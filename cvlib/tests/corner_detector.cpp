@@ -12,6 +12,7 @@ using namespace cvlib;
 
 TEST_CASE("simple check", "[corner_detector_fast]")
 {
+<<<<<<< HEAD
 	auto fast = corner_detector_fast::create();
 	cv::Mat image(10, 10, CV_8UC1);
 	SECTION("empty image")
@@ -102,4 +103,16 @@ TEST_CASE("complex check", "[corner_detector_fast]")
 		fast->detect(image, out);
 		REQUIRE(1 == out.size());
 	}
+=======
+    auto fast = corner_detector_fast::create();
+    cv::Mat image(10, 10, CV_8UC1);
+    SECTION("empty image")
+    {
+        std::vector<cv::KeyPoint> out;
+        fast->detect(image, out);
+        REQUIRE(out.empty());
+    }
+
+    // \todo add 5 or more tests (SECTIONs)
+>>>>>>> upstream/lab_5
 }
