@@ -45,10 +45,10 @@ int demo_corner_detector(int argc, char* argv[])
         cv::imshow(main_wnd, frame);
 
         detector->detect(frame, corners);
-        cv::drawKeypoints(frame, corners, frame, cv::Scalar(0, 0, 255));
+        cv::drawKeypoints(frame, corners, frame, cv::Scalar(0, 255, 0));
         utils::put_fps_text(frame, fps);
 		cv::putText(frame, std::to_string(corners.size()),
-				cv::Point(10, 20), CV_FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0));
+				cv::Point(10, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0));
         cv::imshow(demo_wnd, frame);
     }
 

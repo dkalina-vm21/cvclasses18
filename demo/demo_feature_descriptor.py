@@ -18,7 +18,7 @@ def get_distances(values, cols):
 
   for i in range(0, len(descr)):
     for j in range(i+1, len(descr)):
-      d.append(np.linalg.norm(np.array(descr[i]) - np.array(descr[j])))
+      d.append(dist(i, j))
 
   return d
 

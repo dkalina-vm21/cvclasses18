@@ -80,40 +80,38 @@ class corner_detector_fast : public cv::Feature2D
     virtual void detect(cv::InputArray image, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray mask = cv::noArray()) override;
 	void set_threshold(int thresh);
 
+	/// \see Feature2d::compute
+	virtual void compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) override;
+
+	/// \see Feature2d::detectAndCompute
+	virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
+		bool useProvidedKeypoints = false) override;
+
+	/// \see Feature2d::getDefaultName
+	virtual cv::String getDefaultName() const override
+	{
+		return "FAST_Binary";
+	}
+
 	private:
 	brightness_check_result check_brightness(unsigned int circle_point_num, cv::Point center);
 	bool is_keypoint(cv::Point center, unsigned int step, unsigned int num);
+	void make_test_points();
 
 	const cv::Point circle_template_[16] = { cv::Point(0, -3), cv::Point(1, -3),  cv::Point(2, -2),  cv::Point(3, -1),
 											 cv::Point(3, 0),  cv::Point(3, 1),   cv::Point(2, 2),   cv::Point(1, 3),
 			                                 cv::Point(0, 3),  cv::Point(-1, 3),  cv::Point(-2, 2),  cv::Point(-3, 1),
 			                                 cv::Point(-3, 0), cv::Point(-3, -1), cv::Point(-2, -2), cv::Point(-1, -3) };
+
+	const int patch_size_ = 48;
+	const int descriptor_length_ = 256;
+
 	int threshold_;
 	cv::Mat image_;
-};
+	cv::Mat blured_image_;
 
-/// \brief FAST corner detection algorithm
-class corner_detector_fast : public cv::Feature2D
-{
-    public:
-    /// \brief Fabrique method for creating FAST detector
-    static cv::Ptr<corner_detector_fast> create();
-
-    /// \see Feature2d::detect
-    virtual void detect(cv::InputArray image, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray mask = cv::noArray()) override;
-
-    /// \see Feature2d::compute
-    virtual void compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) override;
-
-    /// \see Feature2d::detectAndCompute
-    virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
-                                  bool useProvidedKeypoints = false) override;
-
-    /// \see Feature2d::getDefaultName
-    virtual cv::String getDefaultName() const override
-    {
-        return "FAST_Binary";
-    }
+	typedef std::vector<std::pair<cv::Point2i, cv::Point2i>> PointsPairs;
+	PointsPairs test_points_pairs_;
 };
 } // namespace cvlib
 
