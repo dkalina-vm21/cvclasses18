@@ -7,8 +7,19 @@
 #ifndef __CVLIB_HPP__
 #define __CVLIB_HPP__
 
+#include <array>
+#include <vector>
 #include <opencv2/opencv.hpp>
 
+namespace
+{
+	enum brightness_check_result
+	{
+		darker = -1,
+	    similar,
+		brighter
+	};
+}; //namespace
 namespace cvlib
 {
 /// \brief Split and merge algorithm for image segmentation
@@ -29,10 +40,11 @@ class motion_segmentation : public cv::BackgroundSubtractor
 {
     public:
     /// \brief ctor
-    motion_segmentation();
+
+	motion_segmentation():is_initialized_(false), current_frame_(0) {};
 
     /// \see cv::BackgroundSubtractor::apply
-    void apply(cv::InputArray image, cv::OutputArray fgmask, double learningRate = -1) override;
+    void apply(cv::InputArray image, cv::OutputArray fgmask, double learningRate = 0.05) override;
 
     /// \see cv::BackgroundSubtractor::BackgroundSubtractor
     void getBackgroundImage(cv::OutputArray backgroundImage) const override
@@ -40,8 +52,21 @@ class motion_segmentation : public cv::BackgroundSubtractor
         backgroundImage.assign(bg_model_);
     }
 
+	/// \brief check for background initialization
+	bool isinitialized() const
+	{
+		return is_initialized_;
+	}
+
+	/// \brief set variance threshold
+	void setVarThreshold(double threshold);
+
     private:
     cv::Mat bg_model_;
+	cv::Mat variance_;
+	double var_threshold_;
+	unsigned int current_frame_;
+	bool is_initialized_;
 };
 
 /// \brief FAST corner detection algorithm
@@ -60,12 +85,41 @@ class corner_detector_fast : public cv::Feature2D
     /// \see Feature2d::detectAndCompute
     virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
                                   bool useProvidedKeypoints = false) override;
+	
+	void set_threshold(int thresh);
 
-    /// \see Feature2d::getDefaultName
-    virtual cv::String getDefaultName() const override
-    {
-        return "FAST_Binary";
-    }
+	/// \see Feature2d::compute
+	virtual void compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) override;
+
+	/// \see Feature2d::detectAndCompute
+	virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
+		bool useProvidedKeypoints = false) override;
+
+	/// \see Feature2d::getDefaultName
+	virtual cv::String getDefaultName() const override
+	{
+		return "FAST_Binary";
+	}
+
+	private:
+	brightness_check_result check_brightness(unsigned int circle_point_num, cv::Point center);
+	bool is_keypoint(cv::Point center, unsigned int step, unsigned int num);
+	void make_test_points();
+
+	const cv::Point circle_template_[16] = { cv::Point(0, -3), cv::Point(1, -3),  cv::Point(2, -2),  cv::Point(3, -1),
+											 cv::Point(3, 0),  cv::Point(3, 1),   cv::Point(2, 2),   cv::Point(1, 3),
+			                                 cv::Point(0, 3),  cv::Point(-1, 3),  cv::Point(-2, 2),  cv::Point(-3, 1),
+			                                 cv::Point(-3, 0), cv::Point(-3, -1), cv::Point(-2, -2), cv::Point(-1, -3) };
+
+	const int patch_size_ = 48;
+	const int descriptor_length_ = 256;
+
+	int threshold_;
+	cv::Mat image_;
+	cv::Mat blured_image_;
+
+	typedef std::vector<std::pair<cv::Point2i, cv::Point2i>> PointsPairs;
+	PointsPairs test_points_pairs_;
 };
 
 /// \brief Descriptor matched based on ratio of SSD
