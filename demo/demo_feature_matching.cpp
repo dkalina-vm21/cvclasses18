@@ -9,6 +9,21 @@
 
 #include "utils.hpp"
 
+namespace
+{
+	void detector_trackbar_callback_func(int threshold, void* obj)
+	{
+		cvlib::corner_detector_fast* detector = (cvlib::corner_detector_fast*)obj;
+		detector->set_threshold(threshold);
+	}
+
+	void ratio_trackbar_callback_func(int value, void* ptr)
+	{
+		((cvlib::descriptor_matcher*)(ptr))->set_ratio(float(value / 100));
+	}
+
+} //namespace
+
 int demo_feature_matching(int argc, char* argv[])
 {
     cv::VideoCapture cap(0);
@@ -21,8 +36,18 @@ int demo_feature_matching(int argc, char* argv[])
     cv::namedWindow(main_wnd);
     cv::namedWindow(demo_wnd);
 
-    auto detector = cv::AKAZE::create(); // \todo use your detector from cvlib
-    auto matcher = cvlib::descriptor_matcher(1.2f); //\todo add trackbar to demo_wnd to tune ratio value
+	auto detector = cvlib::corner_detector_fast::create();
+	auto threshold = 20;
+	cv::createTrackbar("thresh", demo_wnd, &threshold, 50, detector_trackbar_callback_func, (void*)detector);
+	detector->set_threshold(threshold);
+
+	auto ratio = 50;
+    auto matcher = cvlib::descriptor_matcher(ratio);
+	cv::createTrackbar("ratio SSD", demo_wnd, &ratio, 100, ratio_trackbar_callback_func, (void*)&matcher);
+	matcher.set_ratio(ratio/100);
+
+	auto max_distance = 1000;
+	cv::createTrackbar("max_dist", demo_wnd, &max_distance, 5000);
 
     /// \brief helper struct for tidy code
     struct img_features
@@ -43,7 +68,6 @@ int demo_feature_matching(int argc, char* argv[])
     while (pressed_key != 27) // ESC
     {
         cap >> test.img;
-
         detector->detect(test.img, test.corners);
         cv::drawKeypoints(test.img, test.corners, main_frame);
         cv::imshow(main_wnd, main_frame);
@@ -61,8 +85,7 @@ int demo_feature_matching(int argc, char* argv[])
         }
 
         detector->compute(test.img, test.corners, test.descriptors);
-        //\todo add trackbar to demo_wnd to tune threshold value
-        matcher.radiusMatch(test.descriptors, ref.descriptors, pairs, 100.0f);
+        matcher.radiusMatch(test.descriptors, ref.descriptors, pairs, max_distance);
         cv::drawMatches(test.img, test.corners, ref.img, ref.corners, pairs, demo_frame);
 
         utils::put_fps_text(demo_frame, fps);

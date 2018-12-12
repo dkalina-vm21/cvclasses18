@@ -1,7 +1,7 @@
 /* Computer Vision Functions.
  * @file
  * @date 2018-09-05
- * @author Anonymous
+ * @author Darina Kalina
  */
 
 #ifndef __CVLIB_HPP__
@@ -20,6 +20,7 @@ namespace
 		brighter
 	};
 }; //namespace
+
 namespace cvlib
 {
 /// \brief Split and merge algorithm for image segmentation
@@ -79,9 +80,6 @@ class corner_detector_fast : public cv::Feature2D
     /// \see Feature2d::detect
     virtual void detect(cv::InputArray image, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray mask = cv::noArray()) override;
 
-    /// \see Feature2d::compute
-    virtual void compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) override;
-
     /// \see Feature2d::detectAndCompute
     virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
                                   bool useProvidedKeypoints = false) override;
@@ -90,10 +88,6 @@ class corner_detector_fast : public cv::Feature2D
 
 	/// \see Feature2d::compute
 	virtual void compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) override;
-
-	/// \see Feature2d::detectAndCompute
-	virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
-		bool useProvidedKeypoints = false) override;
 
 	/// \see Feature2d::getDefaultName
 	virtual cv::String getDefaultName() const override

@@ -1,7 +1,7 @@
 /* FAST corner detector algorithm implementation.
  * @file
  * @date 2018-10-16
- * @author Anonymous
+ * @author Darina Kalina
  */
 
 #include "cvlib.hpp"
@@ -81,10 +81,10 @@ void corner_detector_fast::make_test_points()
 
 	for (int i = 0; i < descriptor_length_; ++i)
 	{
-		point1.x = cvRound(rng.gaussian(patch_size_ / 5.0));
-		point1.y = cvRound(rng.gaussian(patch_size_ / 5.0));
-		point2.x = cvRound(rng.gaussian(patch_size_ / 5.0));
-		point2.y = cvRound(rng.gaussian(patch_size_ / 5.0));
+		point1.x = abs(cvRound(rng.gaussian(patch_size_ / 5.0)));
+		point1.y = abs(cvRound(rng.gaussian(patch_size_ / 5.0)));
+		point2.x = abs(cvRound(rng.gaussian(patch_size_ / 5.0)));
+		point2.y = abs(cvRound(rng.gaussian(patch_size_ / 5.0)));
 		test_points_pairs_.push_back(std::make_pair(point1, point2));
 	}
 }
@@ -130,30 +130,5 @@ void corner_detector_fast::detectAndCompute(cv::InputArray image, cv::InputArray
 {
 	detect(image, keypoints);
 	compute(image, keypoints, descriptors);
-}
-
-void corner_detector_fast::compute(cv::InputArray, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
-{
-    std::srand(unsigned(std::time(0))); // \todo remove me
-    // \todo implement any binary descriptor
-    const int desc_length = 2;
-    descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32S);
-    auto desc_mat = descriptors.getMat();
-    desc_mat.setTo(0);
-
-    int* ptr = reinterpret_cast<int*>(desc_mat.ptr());
-    for (const auto& pt : keypoints)
-    {
-        for (int i = 0; i < desc_length; ++i)
-        {
-            *ptr = std::rand();
-            ++ptr;
-        }
-    }
-}
-
-void corner_detector_fast::detectAndCompute(cv::InputArray, cv::InputArray, std::vector<cv::KeyPoint>&, cv::OutputArray descriptors, bool /*= false*/)
-{
-    // \todo implement me
 }
 } // namespace cvlib
