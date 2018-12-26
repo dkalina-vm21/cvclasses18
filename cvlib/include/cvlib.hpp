@@ -164,7 +164,48 @@ class descriptor_matcher : public cv::DescriptorMatcher
 /// \brief Stitcher for merging images into big one
 class Stitcher
 {
-    /// \todo design and implement
+	/// \todo design and implement
+public:
+	Stitcher() : count_(0)
+	{
+		detector_ = cv::ORB::create();
+		matcher_ = cv::BFMatcher::create();
+		set_params(16, 26);
+	}
+
+	bool make_stiched_image(cv::Mat new_image);
+	cv::Mat get_stiched_image();
+	void cancel_last();
+	void set_params(int detector_threshold, int max_match_distance);
+	cv::Mat get_debug_info(cv::Mat new_image);
+
+private:
+	int count_;
+
+	cv::Mat stitched_image_;
+	std::vector<cv::KeyPoint> keypoints_;
+	cv::Mat descriptors_;
+
+	cv::Mat prev_stitched_image_;
+	std::vector<cv::KeyPoint> prev_keypoints_;
+	cv::Mat prev_descriptors_;
+
+	cv::Ptr<cv::ORB> detector_;
+	cv::Ptr<cv::BFMatcher> matcher_;
+
+	int max_match_distance_ = 26;
+
+	bool make_new_stiched_image(cv::Mat new_image);
+	void update_keypoints(cv::Point2f offset, cv::Matx33f transform_mat, 
+		const std::vector<cv::KeyPoint>& new_keypoints, cv::Mat new_descriptors,
+		const std::vector<std::vector<cv::DMatch>>& pairs);
+	
+	// \brief helping functions
+	void merge_images(cv::Mat src, cv::Mat dst);
+	cv::Point2f transform_point(cv::Matx33f mat, cv::Point2f point);
+	void get_expanded_size_and_offset(cv::Mat new_image, cv::Matx33f homo_mat, 
+		cv::Mat prev_image, cv::Size& result_size, cv::Point2f& result_offset);
+	cv::Matx33f translate_matrix(cv::Point2f vector);
 };
 } // namespace cvlib
 

@@ -37,17 +37,17 @@ int demo_feature_matching(int argc, char* argv[])
     cv::namedWindow(demo_wnd);
 
 	auto detector = cvlib::corner_detector_fast::create();
-	auto threshold = 20;
+	auto threshold = 30;
 	cv::createTrackbar("thresh", demo_wnd, &threshold, 50, detector_trackbar_callback_func, (void*)detector);
 	detector->set_threshold(threshold);
 
-	auto ratio = 50;
+	auto ratio = 150;
     auto matcher = cvlib::descriptor_matcher(ratio);
 	cv::createTrackbar("ratio SSD", demo_wnd, &ratio, 100, ratio_trackbar_callback_func, (void*)&matcher);
 	matcher.set_ratio(ratio/100);
 
-	auto max_distance = 1000;
-	cv::createTrackbar("max_dist", demo_wnd, &max_distance, 5000);
+	auto max_distance = 500;
+	//cv::createTrackbar("max_dist", demo_wnd, &max_distance, 5000);
 
     /// \brief helper struct for tidy code
     struct img_features
